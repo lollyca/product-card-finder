@@ -42,3 +42,4 @@ next-env.d.ts
 
 # my code
 public/*.csv
+package-lock.json

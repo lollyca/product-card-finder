@@ -4,8 +4,8 @@ const test = async () => {
     console.log("Starting test...");
 
     const testSitemaps = [
-        "https://www.aluminess.com/post-sitemap.xml",
-        "https://www.aluminess.com/page-sitemap.xml"
+        "https://www.aluminess.com/post-sitemap.xml"
+        // "https://www.aluminess.com/page-sitemap.xml"
     ];
 
     try {
