@@ -5,57 +5,26 @@ import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
 
-// Function to fetch URLs from the main sitemap
-const fetchSitemapUrls = async (sitemapUrl: string): Promise<string[]> => {
+// Fetch URLs from the selected sitemaps
+const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
     try {
-        const response = await axios.get(sitemapUrl);
-        const parser = new XMLParser();
-        const parsedData = parser.parse(response.data);
+        let allUrls: string[] = [];
 
-        console.log("Parsed Sitemap Data:", JSON.stringify(parsedData, null, 2));
+        for (const sitemapUrl of sitemaps) {
+            const response = await axios.get(sitemapUrl);
+            const parser = new XMLParser();
+            const parsedData = parser.parse(response.data);
 
-        if (parsedData.sitemapindex && parsedData.sitemapindex.sitemap) {
-            // Only select required sitemaps
-            const allowedSitemaps = ["post-sitemap.xml", "page-sitemap.xml"];
-            const subSitemaps = parsedData.sitemapindex.sitemap
-                .map((entry: { loc: string }) => entry.loc)
-                .filter((url) => allowedSitemaps.some((allowed) => url.includes(allowed)));
-
-            console.log("Filtered Sub-Sitemaps:", subSitemaps);
-
-            let allUrls: string[] = [];
-            for (const subSitemap of subSitemaps) {
-                console.log(`Fetching URLs from: ${subSitemap}`);
-                const urls = await fetchProductUrlsFromSitemap(subSitemap);
+            if (parsedData.urlset && parsedData.urlset.url) {
+                const urls = parsedData.urlset.url.map((entry: { loc: string }) => entry.loc);
                 allUrls = allUrls.concat(urls);
             }
-
-            console.log(`Total product pages found: ${allUrls.length}`);
-            return allUrls;
         }
 
-        console.error("Error: Sitemap structure is different than expected.");
-        return [];
+        console.log(`Total product pages found: ${allUrls.length}`);
+        return allUrls;
     } catch (error) {
-        console.error("Error fetching sitemap:", error);
-        return [];
-    }
-};
-
-// Fetch product page URLs from a product sitemap
-const fetchProductUrlsFromSitemap = async (sitemapUrl: string): Promise<string[]> => {
-    try {
-        const response = await axios.get(sitemapUrl);
-        const parser = new XMLParser();
-        const parsedData = parser.parse(response.data);
-
-        if (parsedData.urlset && parsedData.urlset.url) {
-            return parsedData.urlset.url.map((entry: { loc: string }) => entry.loc);
-        }
-
-        return [];
-    } catch (error) {
-        console.error(`Error fetching product sitemap: ${sitemapUrl}`, error);
+        console.error("Error fetching sitemaps:", error);
         return [];
     }
 };
@@ -83,8 +52,7 @@ const checkImagesOnPage = async (url: string) => {
         });
     });
 
-    console.log(`\nResults for ${url}:`);
-    console.log(products);
+    console.log(`\nResults for ${url}:`, products);
     console.log(`Total product cards found: ${products.length}`);
 
     await browser.close();
@@ -95,25 +63,24 @@ const checkImagesOnPage = async (url: string) => {
 const saveToCSV = async (data: any[]) => {
     if (data.length === 0) {
         console.log("No data to write to CSV.");
-        return;
+        return "";
     }
 
     const csv = parse(data, { fields: ["pageUrl", "name", "imageSrc", "isMissing"] });
 
     // Save file with timestamp
-    const filePath = path.join(__dirname, `missing-images-${Date.now()}.csv`);
+    const filePath = path.join(process.cwd(), "public", `missing-images-${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv);
 
     console.log(`\nCSV file saved: ${filePath}`);
+    return filePath;
 };
 
-// Run image check on all product pages from the sitemap
-const runImageCheckOnSitemap = async () => {
-    const sitemapUrl = "https://www.aluminess.com/sitemap_index.xml";
-    const urls = await fetchSitemapUrls(sitemapUrl);
+// **Exported function to be used in the API**
+export async function runScraper(selectedSitemaps: string[]): Promise<string> {
+    console.log(`Starting scraper for selected sitemaps:`, selectedSitemaps);
 
-    console.log(`\nStarting image check on ${urls.length} pages...\n`);
-
+    const urls = await fetchSitemapUrls(selectedSitemaps);
     let allResults: any[] = [];
 
     for (const url of urls) {
@@ -121,10 +88,6 @@ const runImageCheckOnSitemap = async () => {
         allResults = allResults.concat(products);
     }
 
-    console.log("\nImage check completed for all pages.");
-    console.log("Final results:", allResults);
-    await saveToCSV(allResults);
-};
-
-// Start the process
-runImageCheckOnSitemap();
+    console.log("\nImage check completed.");
+    return await saveToCSV(allResults);
+}
