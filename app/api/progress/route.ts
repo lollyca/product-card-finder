@@ -1,15 +1,13 @@
 import { NextRequest } from "next/server";
 
 let progress = 0;
-let progressCallback: ((message: string) => void) | null = null;
+let progressCallback: ((progress: number, message: string) => void) | null = null;
 
 // Function to send progress updates
-export function sendProgressUpdate(message: string) {
-    progress = parseInt(message.replace(/\D/g, ""), 10) || progress;
-
+export function sendProgressUpdate(progress: number, message: string) {
     if (progressCallback) {
         try {
-            progressCallback(message);
+            progressCallback(progress, message);
         } catch (err) {
             console.error("⚠ Error sending progress update:", err);
         }
@@ -17,20 +15,18 @@ export function sendProgressUpdate(message: string) {
 }
 
 export async function GET(req: NextRequest) {
-    const encoder = new TextEncoder();
-
     return new Response(
         new ReadableStream({
             start(controller) {
-                progressCallback = (message) => {
+                progressCallback = (progress, message) => {
                     try {
-                        controller.enqueue(encoder.encode(`data: ${message}\n\n`));
+                        controller.enqueue(getEncodedMessage(progress, message));
                     } catch (err) {
                         console.error("⚠ SSE Controller closed early:", err);
                     }
                 };
 
-                controller.enqueue(encoder.encode(`data: Starting scraping...\n\n`));
+                controller.enqueue(getEncodedMessage(0, 'Starting scraping...'));
             },
             cancel() {
                 console.log("ℹ SSE connection closed.");
@@ -45,4 +41,10 @@ export async function GET(req: NextRequest) {
             },
         }
     );
+}
+
+function getEncodedMessage(progress: number, message: string): Uint8Array {
+    const encoder = new TextEncoder();
+    const text = JSON.stringify({ progress, message });
+    return encoder.encode(`data: ${text}\n\n`);
 }

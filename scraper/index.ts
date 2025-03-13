@@ -98,7 +98,7 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string> {
 
         const url = urls[i];
 
-        sendProgressUpdate(`Scraping ${i + 1}/${totalPages} pages... (${Math.round(((i + 1) / totalPages) * 100)}%)`);
+        sendProgressUpdate(Math.round(((i + 1) / totalPages) * 100), `Scraping ${i + 1}/${totalPages} pages... (${Math.round(((i + 1) / totalPages) * 100)}%)`);
         console.log(`🔍 Scraping page ${i + 1}/${totalPages}:`, url);
 
         const products = await checkImagesOnPage(url);
