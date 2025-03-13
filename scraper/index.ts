@@ -4,8 +4,9 @@ import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
+import { sendProgressUpdate } from "@/app/api/progress/route"; // ✅ Import SSE progress updates
 
-// Fetch URLs from the selected sitemaps
+// **Fetch URLs from the selected sitemaps**
 const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
     try {
         let allUrls: string[] = [];
@@ -24,12 +25,12 @@ const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
         console.log(`Total product pages found: ${allUrls.length}`);
         return allUrls;
     } catch (error) {
-        console.error("Error fetching sitemaps:", error);
+        console.error("❌ Error fetching sitemaps:", error);
         return [];
     }
 };
 
-// Check images on a single product page
+// **Check images on a single product page**
 const checkImagesOnPage = async (url: string) => {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -59,10 +60,10 @@ const checkImagesOnPage = async (url: string) => {
     return products;
 };
 
-// Save results to CSV
+// **Save results to CSV**
 const saveToCSV = async (data: any[]) => {
     if (data.length === 0) {
-        console.log("No data to write to CSV.");
+        console.log("⚠ No data to write to CSV.");
         return "";
     }
 
@@ -72,22 +73,29 @@ const saveToCSV = async (data: any[]) => {
     const filePath = path.join(process.cwd(), "public", `missing-images-${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv);
 
-    console.log(`\nCSV file saved: ${filePath}`);
+    console.log(`✅ CSV file saved: ${filePath}`);
     return filePath;
 };
 
 // **Exported function to be used in the API**
 export async function runScraper(selectedSitemaps: string[]): Promise<string> {
-    console.log(`Starting scraper for selected sitemaps:`, selectedSitemaps);
+    console.log(`🚀 Starting scraper for selected sitemaps:`, selectedSitemaps);
 
     const urls = await fetchSitemapUrls(selectedSitemaps);
     let allResults: any[] = [];
+    const totalPages = urls.length;
 
-    for (const url of urls) {
+    for (let i = 0; i < totalPages; i++) {
+        const url = urls[i];
+
+        // ✅ Send real-time progress update
+        sendProgressUpdate(`Scraping ${i + 1}/${totalPages} pages... (${Math.round(((i + 1) / totalPages) * 100)}%)`);
+        console.log(`🔍 Scraping page ${i + 1}/${totalPages}:`, url);
+
         const products = await checkImagesOnPage(url);
         allResults = allResults.concat(products);
     }
 
-    console.log("\nImage check completed.");
+    console.log("✅ Scraping complete.");
     return await saveToCSV(allResults);
 }
