@@ -22,13 +22,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid sitemap structure" }, { status: 400 });
         }
 
-        // Filter only the required sub-sitemaps
-        const allowedSitemaps = ["post-sitemap.xml", "page-sitemap.xml"];
-        const subSitemaps = parsedData.sitemapindex.sitemap
-            .map((entry: { loc: string }) => entry.loc)
-            .filter((url: string) => allowedSitemaps.some((allowed) => url.includes(allowed)));
+        // ✅ No filtering – Return ALL sub-sitemaps
+        const subSitemaps = parsedData.sitemapindex.sitemap.map((entry: { loc: string }) => entry.loc);
 
-        console.log("✅ Found relevant sub-sitemaps:", subSitemaps);
+        console.log("✅ Found sub-sitemaps:", subSitemaps);
 
         return NextResponse.json({ subSitemaps });
     } catch (error) {
