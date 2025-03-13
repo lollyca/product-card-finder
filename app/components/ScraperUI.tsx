@@ -118,8 +118,21 @@ export default function ScraperUI() {
                 </button>
             )}
 
-            {/* Progress Display */}
-            {progress && <p className="mt-4 p-2 bg-gray-100">{progress}</p>}
+            {/* Progress Bar */}
+            {progress && (
+                <div className="mt-4 w-full bg-gray-300 rounded-full h-4">
+                    <div
+                        className="bg-green-500 h-4 rounded-full"
+                        style={{
+                            width: typeof progress === "string" && progress.match(/\d+/)
+                                ? `${progress.match(/\d+/)?.[0] ?? "0"}%`
+                                : "0%",
+                        }}
+
+                    ></div>
+                </div>
+            )}
+            <p className="text-center mt-2">{progress}</p>
 
             {/* Download Button */}
             {csvPath && (
