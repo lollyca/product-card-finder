@@ -67,8 +67,8 @@ const checkImagesOnPage = async (url: string) => {
 // **Save results to CSV**
 const saveToCSV = async (data: any[]) => {
     if (data.length === 0) {
-        console.log("⚠ No data to write to CSV.");
-        return "";
+        console.log("⚠ No product images found. Creating an empty CSV with headers.");
+        data = [{ pageUrl: "", name: "No product card found", imageSrc: "", isMissing: "" }];
     }
 
     const csv = parse(data, { fields: ["pageUrl", "name", "imageSrc", "isMissing"] });

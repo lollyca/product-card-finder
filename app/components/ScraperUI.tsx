@@ -139,9 +139,9 @@ export default function ScraperUI() {
 
             {/* Download Button */}
             {csvPath && (
-                <button className="w-full p-2 mt-4 bg-blue-500 text-white rounded" onClick={downloadCSV}>
+                <a href="/api/download" download className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
                     Download CSV
-                </button>
+                </a>
             )}
         </div>
     );
