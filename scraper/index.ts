@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
 import { sendProgressUpdate } from "@/app/api/progress/route"; // ✅ Import SSE progress updates
+import { isScrapingStopped, resetScrapingStatus } from "@/app/api/cancel-scraping/route";
 
 // **Fetch URLs from the selected sitemaps**
 const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
@@ -80,15 +81,20 @@ const saveToCSV = async (data: any[]) => {
 // **Exported function to be used in the API**
 export async function runScraper(selectedSitemaps: string[]): Promise<string> {
     console.log(`🚀 Starting scraper for selected sitemaps:`, selectedSitemaps);
+    resetScrapingStatus(); // ✅ Reset cancel status at the start
 
     const urls = await fetchSitemapUrls(selectedSitemaps);
     let allResults: any[] = [];
     const totalPages = urls.length;
 
     for (let i = 0; i < totalPages; i++) {
+        if (isScrapingStopped()) {
+            console.log("🛑 Scraping was canceled. Stopping process...");
+            return ""; // ✅ Stops scraping early
+        }
+
         const url = urls[i];
 
-        // ✅ Send real-time progress update
         sendProgressUpdate(`Scraping ${i + 1}/${totalPages} pages... (${Math.round(((i + 1) / totalPages) * 100)}%)`);
         console.log(`🔍 Scraping page ${i + 1}/${totalPages}:`, url);
 
@@ -99,3 +105,4 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string> {
     console.log("✅ Scraping complete.");
     return await saveToCSV(allResults);
 }
+
