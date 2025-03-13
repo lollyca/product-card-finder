@@ -18,7 +18,10 @@ const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
             const parsedData = parser.parse(response.data);
 
             if (parsedData.urlset && parsedData.urlset.url) {
-                const urls = parsedData.urlset.url.map((entry: { loc: string }) => entry.loc);
+                const urls = Array.isArray(parsedData.urlset.url)
+                    ? parsedData.urlset.url.map((entry: { loc: string }) => entry.loc) // ✅ If it's an array, map normally
+                    : [parsedData.urlset.url.loc]; // ✅ If it's a single object, wrap it in an array
+
                 allUrls = allUrls.concat(urls);
             }
         }
