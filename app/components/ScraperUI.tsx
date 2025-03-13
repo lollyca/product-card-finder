@@ -103,13 +103,16 @@ export default function ScraperUI() {
             </div>
 
             {/* Start Scraping Button */}
-            <button
-                className={`w-full p-2 rounded ${isScraping ? "bg-gray-400" : "bg-green-500 text-white"}`}
-                onClick={startScraping}
-                disabled={isScraping}
-            >
-                {isScraping ? "Scraping in Progress..." : "Start Scraping"}
-            </button>
+            {/* Show Start Scraping button only if sitemaps were fetched */}
+            {sitemaps.length > 0 && (
+                <button
+                    className={`w-full p-2 mt-4 rounded ${selectedSitemaps.length > 0 ? "bg-green-500 text-white" : "bg-gray-400"}`}
+                    onClick={startScraping}
+                    disabled={selectedSitemaps.length === 0}
+                >
+                    {isScraping ? "Scraping in Progress..." : "Start Scraping"}
+                </button>
+            )}
 
             {/* Cancel Button */}
             {isScraping && (
