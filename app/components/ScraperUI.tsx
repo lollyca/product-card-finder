@@ -111,6 +111,24 @@ export default function ScraperUI() {
                 )}
             </div>
 
+            {/* Select All & Clear All Buttons */}
+            {sitemaps.length > 0 && (
+                <div className="flex gap-2 mb-2">
+                    <button
+                        className="p-2 bg-gray-300 rounded text-sm"
+                        onClick={() => setSelectedSitemaps([...sitemaps])} // ✅ Select all
+                    >
+                        Select All
+                    </button>
+                    <button
+                        className="p-2 bg-gray-300 rounded text-sm"
+                        onClick={() => setSelectedSitemaps([])} // ✅ Clear all
+                    >
+                        Clear All
+                    </button>
+                </div>
+            )}
+
             {/* Start Scraping Button */}
             {sitemaps.length > 0 && (
                 <button
