@@ -130,14 +130,14 @@ export default function ScraperUI() {
             )}
 
             {/* Start Scraping Button */}
-            {sitemaps.length > 0 && (
+            {!isScraping && sitemaps.length > 0 && !progress && (
                 <button
                     className={`w-full p-2 mt-4 rounded ${selectedSitemaps.length > 0 ? "bg-green-500 text-white" : "bg-gray-400"
                         }`}
                     onClick={startScraping}
                     disabled={selectedSitemaps.length === 0}
                 >
-                    {isScraping ? "Scraping in Progress..." : "Start Scraping"}
+                    Start Scraping
                 </button>
             )}
 
