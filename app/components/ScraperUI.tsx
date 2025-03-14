@@ -66,6 +66,22 @@ export default function ScraperUI() {
         }
     };
 
+    const restartScraper = async () => {
+        // If scraping is in progress, cancel it
+        if (isScraping) {
+            await fetch("/api/cancel-scraping", { method: "POST" });
+        }
+
+        // Reset all states
+        setSitemapUrl("");
+        setSitemaps([]);
+        setSelectedSitemaps([]);
+        setProgress("");
+        setProgressPercentage(0);
+        setIsScraping(false);
+        setCsvPath("");
+    };
+
     return (
         <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
             <p className="text-center mt-2">{progress}</p>
@@ -167,6 +183,16 @@ export default function ScraperUI() {
                 <a href="/api/download" download className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
                     Download CSV
                 </a>
+            )}
+
+            {/* Restart Button - Always Visible Once Sitemaps Are Fetched */}
+            {sitemaps.length > 0 && (
+                <button
+                    className="w-full p-2 mt-4 bg-yellow-500 text-white rounded"
+                    onClick={restartScraper}
+                >
+                    Restart
+                </button>
             )}
         </div>
     );
