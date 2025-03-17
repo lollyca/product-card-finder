@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
-
-let isScrapingCanceled = false; // ✅ Global flag to track cancellation
-
-export function cancelScraping() {
-    isScrapingCanceled = true;
-    console.log("🛑 Scraping has been manually canceled.");
-}
-
-export function resetScrapingStatus() {
-    isScrapingCanceled = false;
-}
-
-export function isScrapingStopped() {
-    return isScrapingCanceled;
-}
+import { cancelScraping, isScrapingStopped } from "../utils/scraper-control";
 
 // ✅ Ensure Next.js API Routes follow proper HTTP method exports
 export async function GET() {
-    return NextResponse.json({ message: "Scraper cancel status", isScrapingCanceled });
+    return NextResponse.json({ message: "Scraper cancel status", isScrapingCanceled: isScrapingStopped() });
 }
 
 export async function POST() {

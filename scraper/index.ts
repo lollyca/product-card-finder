@@ -4,8 +4,8 @@ import { XMLParser } from "fast-xml-parser";
 import fs from "fs";
 import path from "path";
 import { parse } from "json2csv";
-import { sendProgressUpdate } from "@/app/api/progress/route"; // ✅ Import SSE progress updates
-import { isScrapingStopped, resetScrapingStatus } from "@/app/api/cancel-scraping/route";
+import { sendProgressUpdate } from "@/app/api/utils/progress"; // ✅ Import SSE progress updates
+import { isScrapingStopped, resetScrapingStatus } from "@/app/api/utils/scraper-control";
 
 // **Fetch URLs from the selected sitemaps**
 const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const publicDir = path.join(process.cwd(), "public");
         const files = fs.readdirSync(publicDir).filter(file => file.startsWith("missing-images-") && file.endsWith(".csv"));
@@ -19,9 +19,18 @@ export async function GET(req: NextRequest) {
         })[0];
 
         const filePath = path.join(publicDir, latestFile);
-        const fileStream = fs.createReadStream(filePath);
 
-        return new Response(fileStream, {
+        // ✅ Convert `fs.createReadStream()` to a `ReadableStream`
+        const fileStream = fs.createReadStream(filePath);
+        const stream = new ReadableStream({
+            start(controller) {
+                fileStream.on("data", (chunk) => controller.enqueue(chunk));
+                fileStream.on("end", () => controller.close());
+                fileStream.on("error", (err) => controller.error(err));
+            },
+        });
+
+        return new Response(stream, {
             headers: {
                 "Content-Disposition": `attachment; filename=${latestFile}`,
                 "Content-Type": "text/csv",

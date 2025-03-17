@@ -80,14 +80,6 @@ export default function ScraperUI() {
         console.log("🚨 Scraping canceled! isScrapingComplete:", isScrapingComplete);
     };
 
-
-    // Download the CSV file
-    const downloadCSV = () => {
-        if (csvPath) {
-            window.location.href = csvPath;
-        }
-    };
-
     const restartScraper = async () => {
         if (isScraping) {
             await fetch("/api/cancel-scraping", { method: "POST" });
@@ -103,7 +95,6 @@ export default function ScraperUI() {
         setIsScrapingComplete(false); // ✅ Reset completion status
         console.log("🔄 Restart clicked! isScrapingComplete:", isScrapingComplete);
     };
-
 
     return (
         <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
