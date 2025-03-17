@@ -39,7 +39,16 @@ const checkImagesOnPage = async (url: string) => {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto(url, { waitUntil: "networkidle2" });
+    try {
+        await page.goto(url, {
+            waitUntil: "domcontentloaded", // Faster than "networkidle2"
+            timeout: 60000, // ✅ Increase timeout to 60 seconds
+        });
+    } catch (error) {
+        console.error(`❌ Timeout or navigation error on: ${url}`, error);
+        await browser.close();
+        return []; // ✅ Return empty results to prevent crashing
+    }
 
     const products = await page.evaluate(() => {
         return Array.from(document.querySelectorAll(".bpag-product-card")).map((card) => {
@@ -82,7 +91,7 @@ const saveToCSV = async (data: any[]) => {
 };
 
 // **Exported function to be used in the API**
-export async function runScraper(selectedSitemaps: string[]): Promise<string> {
+export async function runScraper(selectedSitemaps: string[]): Promise<string | null> {
     console.log(`🚀 Starting scraper for selected sitemaps:`, selectedSitemaps);
     resetScrapingStatus(); // ✅ Reset cancel status at the start
 
@@ -93,7 +102,7 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string> {
     for (let i = 0; i < totalPages; i++) {
         if (isScrapingStopped()) {
             console.log("🛑 Scraping was canceled. Stopping process...");
-            return ""; // ✅ Stops scraping early
+            return null; // ✅ Stops scraping early
         }
 
         const url = urls[i];
@@ -101,11 +110,19 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string> {
         sendProgressUpdate(Math.round(((i + 1) / totalPages) * 100), `Scraping ${i + 1}/${totalPages} pages... (${Math.round(((i + 1) / totalPages) * 100)}%)`);
         console.log(`🔍 Scraping page ${i + 1}/${totalPages}:`, url);
 
-        const products = await checkImagesOnPage(url);
-        allResults = allResults.concat(products);
+        try {
+            const products = await checkImagesOnPage(url);
+            allResults = allResults.concat(products);
+        } catch (error) {
+            console.error(`❌ Skipping failed page: ${url}`, error);
+        }
+
     }
 
-    console.log("✅ Scraping complete.");
-    return await saveToCSV(allResults);
+    const filePath = await saveToCSV(allResults);
+    const relativePath = "/" + path.basename(filePath); // ✅ Get only the filename
+    console.log(`✅ Scraping complete. CSV available at: ${relativePath}`);
+    return relativePath;
+
 }
 

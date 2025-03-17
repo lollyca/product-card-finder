@@ -10,6 +10,8 @@ export default function ScraperUI() {
     const [progressPercentage, setProgressPercentage] = useState(0);
     const [isScraping, setIsScraping] = useState(false);
     const [csvPath, setCsvPath] = useState("");
+    const [isScrapingComplete, setIsScrapingComplete] = useState(false);
+
 
     // Fetch sitemaps from the entered URL
     const fetchSitemaps = async () => {
@@ -25,31 +27,43 @@ export default function ScraperUI() {
     // Start scraping process
     const startScraping = async () => {
         setIsScraping(true);
+        setIsScrapingComplete(false);
         setProgress("Starting scraping...");
         setProgressPercentage(0);
 
-        // Open SSE connection to track progress
         const eventSource = new EventSource("/api/progress");
         eventSource.onmessage = (event) => {
             if (event.data) {
                 const { progress, message } = JSON.parse(event.data);
-
                 setProgress(message);
                 setProgressPercentage(progress);
             }
         };
 
-        // Send request to start scraping
-        const response = await fetch("/api/start-scraping", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ selectedSitemaps }),
-        });
+        try {
+            const response = await fetch("/api/start-scraping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ selectedSitemaps }),
+            });
 
-        const data = await response.json();
-        setCsvPath(data.csvPath || "");
-        setIsScraping(false);
-        eventSource.close();
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Scraping failed.");
+            }
+
+            setCsvPath(data.csvPath || "");
+            if (data.csvPath) {
+                setIsScrapingComplete(true);
+            }
+        } catch (error) {
+            console.error("❌ Scraping failed:", error);
+            setProgress("Scraping failed. Please try again.");
+        } finally {
+            setIsScraping(false);
+            eventSource.close();
+        }
     };
 
     // Cancel the scraping process
@@ -57,7 +71,10 @@ export default function ScraperUI() {
         await fetch("/api/cancel-scraping", { method: "POST" });
         setIsScraping(false);
         setProgress("Scraping canceled.");
+        setIsScrapingComplete(false); // ✅ Reset completion status
+        console.log("🚨 Scraping canceled! isScrapingComplete:", isScrapingComplete);
     };
+
 
     // Download the CSV file
     const downloadCSV = () => {
@@ -67,12 +84,10 @@ export default function ScraperUI() {
     };
 
     const restartScraper = async () => {
-        // If scraping is in progress, cancel it
         if (isScraping) {
             await fetch("/api/cancel-scraping", { method: "POST" });
         }
 
-        // Reset all states
         setSitemapUrl("");
         setSitemaps([]);
         setSelectedSitemaps([]);
@@ -80,7 +95,10 @@ export default function ScraperUI() {
         setProgressPercentage(0);
         setIsScraping(false);
         setCsvPath("");
+        setIsScrapingComplete(false); // ✅ Reset completion status
+        console.log("🔄 Restart clicked! isScrapingComplete:", isScrapingComplete);
     };
+
 
     return (
         <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
@@ -165,7 +183,6 @@ export default function ScraperUI() {
             )}
 
             {/* Progress Bar - Only Show When Scraping */}
-            {/* Keep progress bar visible after scraping is done */}
             {progress && (
                 <>
                     <div className="mt-4 w-full bg-gray-300 rounded-full h-4 overflow-hidden">
@@ -179,8 +196,8 @@ export default function ScraperUI() {
             )}
 
             {/* Download Button */}
-            {csvPath && (
-                <a href="/api/download" download className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
+            {csvPath && isScrapingComplete && !isScraping && (
+                <a href={csvPath.replace("/downloads/", "/")} download className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
                     Download CSV
                 </a>
             )}

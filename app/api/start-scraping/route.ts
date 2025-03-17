@@ -16,6 +16,10 @@ export async function POST(req: Request) {
 
         // Run the scraper
         const csvPath = await runScraper(selectedSitemaps);
+        if (!csvPath) {
+            console.log("🛑 Scraping was canceled. No CSV generated.");
+            return NextResponse.json({ error: "Scraping was canceled", csvPath: null }, { status: 400 });
+        }
 
         // Get relative path for frontend download
         const relativeCsvPath = `/downloads/${path.basename(csvPath)}`;
