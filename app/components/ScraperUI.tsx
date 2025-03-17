@@ -102,7 +102,6 @@ export default function ScraperUI() {
 
     return (
         <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md">
-            <p className="text-center mt-2">{progress}</p>
             <h1 className="text-2xl font-bold mb-4">Product Card Scraper</h1>
 
             {/* Sitemap Input */}
