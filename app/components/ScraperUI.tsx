@@ -50,6 +50,11 @@ export default function ScraperUI() {
             const data = await response.json();
 
             if (!response.ok) {
+                if (data.error === "Scraping was canceled") {
+                    console.warn("ℹ Scraping was manually canceled. No error.");
+                    setProgress("Scraping canceled."); // ✅ Display a normal message
+                    return;
+                }
                 throw new Error(data.error || "Scraping failed.");
             }
 
