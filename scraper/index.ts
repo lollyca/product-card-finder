@@ -74,7 +74,7 @@ const checkImagesOnPage = async (url: string) => {
 };
 
 // **Save results to CSV**
-const saveToCSV = async (data: any[]) => {
+const formatToCSV = async (data: any[]) => {
     if (data.length === 0) {
         console.log("⚠ No product images found. Creating an empty CSV with headers.");
         data = [{ pageUrl: "", name: "No product card found", imageSrc: "", isMissing: "" }];
@@ -82,12 +82,7 @@ const saveToCSV = async (data: any[]) => {
 
     const csv = parse(data, { fields: ["pageUrl", "name", "imageSrc", "isMissing"] });
 
-    // Save file with timestamp
-    const filePath = path.join(process.cwd(), "public", `missing-images-${Date.now()}.csv`);
-    fs.writeFileSync(filePath, csv);
-
-    console.log(`✅ CSV file saved: ${filePath}`);
-    return filePath;
+    return csv;
 };
 
 // **Exported function to be used in the API**
@@ -119,10 +114,8 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string | n
 
     }
 
-    const filePath = await saveToCSV(allResults);
-    const relativePath = "/" + path.basename(filePath); // ✅ Get only the filename
-    console.log(`✅ Scraping complete. CSV available at: ${relativePath}`);
-    return relativePath;
+    const csvString = await formatToCSV(allResults);
 
+    return csvString;
 }
 

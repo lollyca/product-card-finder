@@ -9,7 +9,7 @@ export default function ScraperUI() {
     const [progress, setProgress] = useState<string>("");
     const [progressPercentage, setProgressPercentage] = useState(0);
     const [isScraping, setIsScraping] = useState(false);
-    const [csvPath, setCsvPath] = useState("");
+    const [csvText, setCsvText] = useState("");
     const [isScrapingComplete, setIsScrapingComplete] = useState(false);
 
 
@@ -22,6 +22,7 @@ export default function ScraperUI() {
         });
         const data = await response.json();
         if (data.subSitemaps) setSitemaps(data.subSitemaps);
+        console.log("done");
     };
 
     // Start scraping process
@@ -58,8 +59,8 @@ export default function ScraperUI() {
                 throw new Error(data.error || "Scraping failed.");
             }
 
-            setCsvPath(data.csvPath || "");
-            if (data.csvPath) {
+            setCsvText(data.csvData || "");
+            if (data.csvData) {
                 setIsScrapingComplete(true);
             }
         } catch (error) {
@@ -91,7 +92,7 @@ export default function ScraperUI() {
         setProgress("");
         setProgressPercentage(0);
         setIsScraping(false);
-        setCsvPath("");
+        setCsvText("");
         setIsScrapingComplete(false); // ✅ Reset completion status
         console.log("🔄 Restart clicked! isScrapingComplete:", isScrapingComplete);
     };
@@ -191,8 +192,8 @@ export default function ScraperUI() {
             )}
 
             {/* Download Button */}
-            {csvPath && isScrapingComplete && !isScraping && (
-                <a href={csvPath.replace("/downloads/", "/")} download className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
+            {csvText && isScrapingComplete && !isScraping && (
+                <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(csvText)}`} download="new_data.csv" className="w-full p-2 mt-4 bg-blue-500 text-white rounded text-center block">
                     Download CSV
                 </a>
             )}
