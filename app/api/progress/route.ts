@@ -15,7 +15,7 @@ export async function GET() {
                 controller.enqueue(getEncodedMessage(0, 'Starting scraping...'));
             },
             cancel() {
-                console.log("ℹ SSE connection closed.");
+                console.log("API SSE connection closed.");
                 setProgressCallback(() => { }); // Reset callback
             },
         }),

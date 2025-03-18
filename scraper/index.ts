@@ -76,7 +76,7 @@ const checkImagesOnPage = async (url: string) => {
 // **Save results to CSV**
 const formatToCSV = async (data: any[]) => {
     if (data.length === 0) {
-        console.log("⚠ No product images found. Creating an empty CSV with headers.");
+        console.log("No product images found. Creating an empty CSV with headers.");
         data = [{ pageUrl: "", name: "No product card found", imageSrc: "", isMissing: "" }];
     }
 

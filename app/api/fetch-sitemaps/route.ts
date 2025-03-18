@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing sitemapUrl" }, { status: 400 });
         }
 
-        console.log("📡 Fetching sub-sitemaps from:", sitemapUrl);
+        console.log("📡 API Fetching sub-sitemaps from:", sitemapUrl);
 
         // Fetch sitemap
         const response = await axios.get(sitemapUrl);
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         // ✅ No filtering – Return ALL sub-sitemaps
         const subSitemaps = parsedData.sitemapindex.sitemap.map((entry: { loc: string }) => entry.loc);
 
-        console.log("✅ Found sub-sitemaps:", subSitemaps);
+        console.log("✅ API Found sub-sitemaps:", subSitemaps);
 
         return NextResponse.json({ subSitemaps });
     } catch (error) {

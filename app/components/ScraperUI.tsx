@@ -22,7 +22,6 @@ export default function ScraperUI() {
         });
         const data = await response.json();
         if (data.subSitemaps) setSitemaps(data.subSitemaps);
-        console.log("done");
     };
 
     // Start scraping process

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid request format. Provide an array of sitemaps." }, { status: 400 });
         }
 
-        console.log("🚀 Starting scraper with sitemaps:", selectedSitemaps);
+        console.log("🚀 API Starting scraper with sitemaps:", selectedSitemaps);
 
         // Run the scraper
         const csvData = await runScraper(selectedSitemaps);
