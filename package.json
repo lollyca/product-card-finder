@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@sparticuz/chromium-min": "^133.0.0",
     "axios": "^1.8.2",
     "fast-xml-parser": "^5.0.8",
     "json2csv": "^6.0.0-alpha.2",
     "next": "15.2.2",
     "puppeteer": "^24.4.0",
+    "puppeteer-core": "^24.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

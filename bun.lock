@@ -4,11 +4,13 @@
     "": {
       "name": "product-card-finder",
       "dependencies": {
+        "@sparticuz/chromium-min": "^133.0.0",
         "axios": "^1.8.2",
         "fast-xml-parser": "^5.0.8",
         "json2csv": "^6.0.0-alpha.2",
         "next": "15.2.2",
         "puppeteer": "^24.4.0",
+        "puppeteer-core": "^24.4.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
       },
@@ -132,6 +134,8 @@
     "@rtsao/scc": ["@rtsao/scc@1.1.0", "", {}, "sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g=="],
 
     "@rushstack/eslint-patch": ["@rushstack/eslint-patch@1.11.0", "", {}, "sha512-zxnHvoMQVqewTJr/W4pKjF0bMGiKJv1WX7bSrkl46Hg0QjESbzBROWK0Wg4RphzSOS5Jiy7eFimmM3UgMrMZbQ=="],
+
+    "@sparticuz/chromium-min": ["@sparticuz/chromium-min@133.0.0", "", { "dependencies": { "follow-redirects": "^1.15.9", "tar-fs": "^3.0.8" } }, "sha512-7obk2CRitrlyxT4AKsCjSfE0QiHjDbi5GeOJirkerAZFV7o4VAsKzqoTQ/6rm3segZwfNFZzy8EdDelfV08aag=="],
 
     "@streamparser/json": ["@streamparser/json@0.0.6", "", {}, "sha512-vL9EVn/v+OhZ+Wcs6O4iKE9EUpwHUqHmCtNUMWjqp+6dr85+XPOSGTEsqYNq1Vn04uk9SWlOVmx9J48ggJVT2Q=="],
 
