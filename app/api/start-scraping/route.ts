@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         console.log("🚀 Starting scraper with sitemaps:", selectedSitemaps);
 
         // Run the scraper
-        let csvData = await runScraper(selectedSitemaps);
+        const csvData = await runScraper(selectedSitemaps);
 
         return NextResponse.json({ message: "Scraping completed successfully", csvData });
 
