@@ -1,6 +1,6 @@
-# Product Card Scraper
+# Product Issue Finder
 
-A dynamic monitoring tool that helps identify missing product images across any website using a sitemap. Designed for marketing and content teams to quickly audit product pages and ensure visual consistency.
+A dynamic monitoring tool that helps identify missing product information across any website using a sitemap. Designed for marketing and content teams to quickly audit product pages and ensure visual consistency.
 
 Built with real-time progress tracking, seamless UI, and automatic CSV export — all powered by Puppeteer and Next.js.
 
