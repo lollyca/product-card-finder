@@ -8,9 +8,9 @@ Built with real-time progress tracking, seamless UI, and automatic CSV export �
 
 ## Description
 
-This web app allows users to input their website's sitemap, fetch all discoverable sub-sitemaps, select the ones they want to scan, and scrape product pages for missing images. The scraping is done headlessly using Puppeteer and updates the UI with real-time progress using Server-Sent Events (SSE).
+This web app allows users to input their website's sitemap, fetch all discoverable sub-sitemaps, select the ones they want to scan, and scrape product pages for missing information. The scraping is done headlessly using Puppeteer and updates the UI with real-time progress using Server-Sent Events (SSE).
 
-Once scraping is complete, a CSV file is generated and automatically downloaded with a list of product pages missing images.
+Once scraping is complete, a CSV file is generated and automatically downloaded with a list of product pages missing information (title, price, image, etc).
 
 ---
 
@@ -20,7 +20,7 @@ Once scraping is complete, a CSV file is generated and automatically downloaded 
 - Sub-sitemap Selection — Pick only the sections you want to scrape
 - Headless Scraping — Uses Puppeteer to render pages like a real browser
 - Real-Time Progress Updates — Live feedback using Server-Sent Events (SSE)
-- Instant CSV Export — Downloads a CSV file with missing image data (no file saving needed)
+- Instant CSV Export — Downloads a CSV file with missing information data (no file saving needed)
 - Reset & Cancel Controls — Full control of scraping flow for better UX
 - Production-Ready — Fully SSR with Bun + Next.js for fast deploys
 
@@ -44,13 +44,16 @@ Once scraping is complete, a CSV file is generated and automatically downloaded 
 Most product images are loaded client-side with JavaScript. Traditional HTTP-based scrapers (like `axios` + `cheerio`) wouldn’t work. Puppeteer was used to fully render each page like a real browser.
 
 ### 2. Progress Feedback
-We needed a way to communicate scraping progress to the user in real time. Server-Sent Events (SSE) offered a clean solution — lightweight and easy to integrate with React's state.
+I needed a way to communicate scraping progress to the user in real time. Server-Sent Events (SSE) offered a clean solution — lightweight and easy to integrate with React's state.
 
 ### 3. File Downloads in Production
-Initially, the app saved CSVs to the `/public` folder, but in production this caused issues with static builds. We refactored to stream the CSV as a response instead, using `Blob` downloads in the browser — no file saving needed.
+Initially, the app saved CSVs to the `/public` folder, but in production this caused issues with static builds. I refactored to stream the CSV as a response instead, using `Blob` downloads in the browser — no file saving needed.
 
 ### 4. Canceling Long Tasks
-Scraping large sites can take time. We added a shared cancel flag that lets users interrupt scraping safely, and the backend respects that flag mid-process.
+Scraping large sites can take time. I added a shared cancel flag that lets users interrupt scraping safely, and the backend respects that flag mid-process.
+
+### 5. Deploying Puppeteer on Vercel
+Vercel’s serverless functions don’t support long-running or headless browser processes like Puppeteer out of the box. To avoid limitations, I opted to run the app on a traditional server environment using Bun and Next.js with Node compatibility. This ensured Puppeteer could run in a full environment without hitting memory or timeout issues.
 
 ---
 
