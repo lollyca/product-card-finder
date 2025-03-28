@@ -1,5 +1,14 @@
 # Product Issue Finder
 
+<div style="display: flex; gap: 10px;">
+  
+  <img src="./public/step1.png" alt="Step 1" width="300" />
+  <img src="./public/step2.png" alt="Step 3" width="300" />
+  <img src="./public/step3.png" alt="Step 4" width="300" />
+  <img src="./public/step4.png" alt="Step 5" width="300" />
+  
+</div>
+
 A dynamic monitoring tool that helps identify missing product information across any website using a sitemap. Designed for marketing and content teams to quickly audit product pages and ensure visual consistency.
 
 Built with real-time progress tracking, seamless UI, and automatic CSV export — all powered by Puppeteer and Next.js.
