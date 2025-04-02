@@ -1,11 +1,36 @@
 import puppeteer from "puppeteer";
+import chromium from "@sparticuz/chromium-min";
+import puppeteerCore, { Browser, Page } from "puppeteer-core";
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
-import fs from "fs";
-import path from "path";
 import { parse } from "json2csv";
 import { sendProgressUpdate } from "@/app/api/utils/progress"; // ✅ Import SSE progress updates
 import { isScrapingStopped, resetScrapingStatus } from "@/app/api/utils/scraper-control";
+
+
+//prep for enviorment
+const remoteExecutablePath = "https://github.com/Sparticuz/chromium/releases/download/v121.0.0/chromium-v121.0.0-pack.tar";
+
+let browser: Browser | undefined;
+
+async function getBrowser() {
+    if (browser) return browser;
+
+    if (process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT === "production") {
+        browser = await puppeteerCore.launch({
+            args: chromium.args,
+            executablePath: await chromium.executablePath(remoteExecutablePath),
+            headless: chromium.headless,
+        });
+    } else {
+        browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            headless: true,
+        }) as any;
+    }
+    return browser;
+}
+
 
 // **Fetch URLs from the selected sitemaps**
 const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
@@ -36,42 +61,45 @@ const fetchSitemapUrls = async (sitemaps: string[]): Promise<string[]> => {
 
 // **Check images on a single product page**
 const checkImagesOnPage = async (url: string) => {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
+    const browser = await getBrowser();
+    let page: Page | undefined = undefined;
 
     try {
+        page = await browser!.newPage();
+
         await page.goto(url, {
-            waitUntil: "domcontentloaded", // Faster than "networkidle2"
-            timeout: 60000, // ✅ Increase timeout to 60 seconds
+            waitUntil: "domcontentloaded",
+            timeout: 60000,
         });
+
+        const products = await page.evaluate(() => {
+            return Array.from(document.querySelectorAll(".bpag-product-card")).map((card) => {
+                const img = card.querySelector("img");
+                const imgSrc = img?.getAttribute("src") || "No Image";
+                const productName =
+                    card.querySelector(".my-4.text-lg.font-bold.heading-font")?.textContent?.trim() || "Unknown Product";
+
+                return {
+                    pageUrl: window.location.href,
+                    name: productName,
+                    imageSrc: imgSrc,
+                    isMissing: !imgSrc || imgSrc === "No Image",
+                };
+            });
+        });
+
+        console.log(`\nResults for ${url}:`, products);
+        console.log(`Total product cards found: ${products.length}`);
+
+        await page.close(); // ✅ just close the page, not the browser
+        return products;
     } catch (error) {
         console.error(`❌ Timeout or navigation error on: ${url}`, error);
-        await browser.close();
-        return []; // ✅ Return empty results to prevent crashing
+        if (page) await page.close(); // close page only if it was created
+        return [];
     }
-
-    const products = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll(".bpag-product-card")).map((card) => {
-            const img = card.querySelector("img");
-            const imgSrc = img?.getAttribute("src") || "No Image";
-            const productName =
-                card.querySelector(".my-4.text-lg.font-bold.heading-font")?.textContent?.trim() || "Unknown Product";
-
-            return {
-                pageUrl: window.location.href,
-                name: productName,
-                imageSrc: imgSrc,
-                isMissing: !imgSrc || imgSrc === "No Image",
-            };
-        });
-    });
-
-    console.log(`\nResults for ${url}:`, products);
-    console.log(`Total product cards found: ${products.length}`);
-
-    await browser.close();
-    return products;
 };
+
 
 // **Save results to CSV**
 const formatToCSV = async (data: any[]) => {
@@ -115,6 +143,11 @@ export async function runScraper(selectedSitemaps: string[]): Promise<string | n
     }
 
     const csvString = await formatToCSV(allResults);
+
+    if (browser) {
+        await browser.close(); // ✅ clean up once at the very end
+        browser = undefined;         // reset global reference
+    }
 
     return csvString;
 }

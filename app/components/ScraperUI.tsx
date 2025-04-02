@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { FetchSitemapsRequest } from "../api/fetch-sitemaps/route";
-import { symlink } from "fs";
 
 export default function ScraperUI() {
     const [sitemapUrl, setSitemapUrl] = useState("");
