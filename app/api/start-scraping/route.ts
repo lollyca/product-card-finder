@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { runScraper } from "@/scraper/index"; // Absolute import
 
+export interface StartScrapingRequest {
+    selectedSitemaps: string[];
+}
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
+        const body: StartScrapingRequest = await req.json();
         const { selectedSitemaps } = body;
 
         if (!selectedSitemaps || !Array.isArray(selectedSitemaps)) {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FetchSitemapsRequest } from "../api/fetch-sitemaps/route";
+import { symlink } from "fs";
 
 export default function ScraperUI() {
     const [sitemapUrl, setSitemapUrl] = useState("");
@@ -15,10 +17,14 @@ export default function ScraperUI() {
 
     // Fetch sitemaps from the entered URL
     const fetchSitemaps = async () => {
+        const urlInput: FetchSitemapsRequest = {
+            sitemapUrl: sitemapUrl
+        }
+
         const response = await fetch("/api/fetch-sitemaps", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sitemapUrl }),
+            body: JSON.stringify(urlInput),
         });
         const data = await response.json();
         if (data.subSitemaps) setSitemaps(data.subSitemaps);

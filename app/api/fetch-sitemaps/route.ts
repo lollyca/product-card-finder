@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 
+export interface FetchSitemapsRequest {
+    sitemapUrl: string;
+}
+
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
+        const body: FetchSitemapsRequest = await req.json();
         const { sitemapUrl } = body;
 
         if (!sitemapUrl) {
